@@ -1,0 +1,128 @@
+package com.main.proxy.dp;
+
+import java.util.*;
+
+public class BK {
+    private BkUnit root;
+
+    public static void main(String[] args) {
+        BK bk = new BK();
+        BkUnit root = null;
+        /*
+            age
+                --3-- apple
+                --5-- address
+                --2-- able
+                          --2-- take
+                                --1-- gate
+                          --3-- bag
+                                --3-- take
+                                     --1-- gate
+                --6-- ability
+                --8-- accompany
+         */
+        String[] words = new String[]{"age", "apple", "address", "able", "ability", "accompany", "bag","take", "wake"};
+        for(int i = 0; i < words.length; i++) {
+            root = bk.buildRoot(root, words[i]);
+        }
+        bk.root = root;
+        String searchText = "gake";
+        List<String> result = new ArrayList<String>();
+        result = bk.search(root, result, searchText, 1);
+        System.out.println(result.get(0));
+    }
+
+    public List<String> search(BkUnit root,List<String> result, String text, int radium) {
+        int dist = editDist(root.word, text);
+        if (dist <= radium) {
+            result.add(root.word);
+       }
+       if (root.getIter() != null) {
+           for (int i = Math.abs(radium - dist); i <= radium + dist; i++) {
+               if (root.getIter().containsKey(i)) {
+                   search(root.getIter().get(i), result, text, radium);
+               }
+           }
+       }
+       return result;
+    }
+
+    public BkUnit buildRoot(BkUnit root, String text) {
+        if (root == null) {
+            return new BkUnit(text, 1);
+        }
+        int dist = editDist(root.getWord(), text);
+        if (text == null && text.trim().equals("") || dist == 0) {
+            return null;
+        }
+        if (null != root.getIter() && null != root.getIter().get(dist)) {
+            buildRoot(root.getIter().get(dist), text);
+        } else {
+            if (root.getIter() == null) {
+                Map<Integer, BkUnit> iter = new HashMap<Integer, BkUnit>();
+                iter.put(dist, new BkUnit(text, root.getDist() + 1));
+                root.setIter(iter);
+            } else {
+                root.getIter().put(dist, new BkUnit(text, root.getDist() +1));
+            }
+        }
+        return root;
+    }
+
+
+
+    public int editDist(String a, String b) {
+        int[][] tab = new int[a.length()+1][b.length()+1];
+        for (int i = 0; i < tab.length; i++) {
+            for (int j = 0; j < tab[0].length; j++) {
+                if (i == 0 || j == 0) {
+                    tab[i][j] = i + j;
+                } else  {
+                    if (a.charAt(i-1) == b.charAt(j-1)) {
+                        tab[i][j] = tab[i-1][j-1];
+                    } else {
+                        tab[i][j] = Math.min(tab[i-1][j-1], Math.min(tab[i-1][j], tab[i][j-1])) + 1;
+                    }
+                }
+            }
+        }
+        return tab[tab.length-1][tab[0].length-1];
+    }
+}
+
+
+class BkUnit {
+    public BkUnit(String word, int dist) {
+        this.word = word;
+        this.dist = dist;
+    }
+    String word;
+
+    int dist;
+
+    public void setDist(int dist) {
+        this.dist = dist;
+    }
+
+    public int getDist() {
+        return this.dist;
+    }
+
+    Map<Integer, BkUnit>  iter;
+
+    public String getWord() {
+        return word;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    public Map<Integer, BkUnit> getIter() {
+        return iter;
+    }
+
+    public void setIter(Map<Integer, BkUnit> iter) {
+        this.iter = iter;
+    }
+}
