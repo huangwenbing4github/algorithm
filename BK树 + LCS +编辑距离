@@ -28,8 +28,8 @@ public class BK {
         bk.root = root;
         String searchText = "gake";
         List<String> result = new ArrayList<String>();
+        //当radium 过大，效果不好
         result = bk.search(root, result, searchText, 1);
-        System.out.println(result.get(0));
     }
 
     public List<String> search(BkUnit root,List<String> result, String text, int radium) {
@@ -49,7 +49,7 @@ public class BK {
 
     public BkUnit buildRoot(BkUnit root, String text) {
         if (root == null) {
-            return new BkUnit(text, 1);
+            return new BkUnit(text);
         }
         int dist = editDist(root.getWord(), text);
         if (text == null && text.trim().equals("") || dist == 0) {
@@ -60,10 +60,10 @@ public class BK {
         } else {
             if (root.getIter() == null) {
                 Map<Integer, BkUnit> iter = new HashMap<Integer, BkUnit>();
-                iter.put(dist, new BkUnit(text, root.getDist() + 1));
+                iter.put(dist, new BkUnit(text));
                 root.setIter(iter);
             } else {
-                root.getIter().put(dist, new BkUnit(text, root.getDist() +1));
+                root.getIter().put(dist, new BkUnit(text));
             }
         }
         return root;
@@ -92,21 +92,10 @@ public class BK {
 
 
 class BkUnit {
-    public BkUnit(String word, int dist) {
+    public BkUnit(String word) {
         this.word = word;
-        this.dist = dist;
     }
     String word;
-
-    int dist;
-
-    public void setDist(int dist) {
-        this.dist = dist;
-    }
-
-    public int getDist() {
-        return this.dist;
-    }
 
     Map<Integer, BkUnit>  iter;
 
